@@ -23,17 +23,22 @@
 #include "config.h"
 #include "glibconfig.h"
 
-#ifndef G_OS_WIN32
+#ifdef G_OS_WIN32
+#include "win_iconv.c"
+#else
+#ifdef USE_LIBICONV_GNU
 #include <iconv.h>
 #endif
+#endif
+
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef G_OS_WIN32
-#include "win_iconv.c"
-#endif
+#include "gprintfint.h"
+#include "gthreadprivate.h"
+#include "gunicode.h"
 
 #ifdef G_PLATFORM_WIN32
 #define STRICT
@@ -199,6 +204,7 @@ g_convert_error_quark (void)
   return g_quark_from_static_string ("g_convert_error");
 }
 
+#ifdef USE_LIBICONV_GNU
 static gboolean
 try_conversion (const char *to_codeset,
 		const char *from_codeset,
@@ -231,6 +237,7 @@ try_to_aliases (const char **to_aliases,
 
   return FALSE;
 }
+#endif /* USE_LIBICONV_GNU */
 
 G_GNUC_INTERNAL extern const char ** 
 _g_charset_get_aliases (const char *canonical_name);
@@ -254,6 +261,7 @@ GIConv
 g_iconv_open (const gchar  *to_codeset,
 	      const gchar  *from_codeset)
 {
+#ifdef USE_LIBICONV_GNU
   iconv_t cd;
   
   if (!try_conversion (to_codeset, from_codeset, &cd))
@@ -282,6 +290,9 @@ g_iconv_open (const gchar  *to_codeset,
 
  out:
   return (cd == (iconv_t)-1) ? (GIConv)-1 : (GIConv)cd;
+#else
+  return (GIConv)-1;
+#endif /* USE_LIBICONV_GNU */
 }
 
 /**
@@ -308,9 +319,13 @@ g_iconv (GIConv   converter,
 	 gchar  **outbuf,
 	 gsize   *outbytes_left)
 {
+#ifdef USE_LIBICONV_GNU
   iconv_t cd = (iconv_t)converter;
 
   return iconv (cd, inbuf, inbytes_left, outbuf, outbytes_left);
+#else
+  return -1;
+#endif /* USE_LIBICONV_GNU */
 }
 
 /**
@@ -331,13 +346,18 @@ g_iconv (GIConv   converter,
 gint
 g_iconv_close (GIConv converter)
 {
+#ifdef USE_LIBICONV_GNU
   iconv_t cd = (iconv_t)converter;
 
   return iconv_close (cd);
+#else
+  return -1;
+#endif /* USE_LIBICONV_GNU */
 }
 
 
 #ifdef NEED_ICONV_CACHE
+#ifdef USE_LIBICONV_GNU
 
 #define ICONV_CACHE_SIZE   (16)
 
@@ -624,6 +644,7 @@ close_converter (GIConv converter)
   return 0;
 }
 
+#endif /* USE_LIBICONV_GNU */
 #else  /* !NEED_ICONV_CACHE */
 
 static GIConv
