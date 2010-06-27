@@ -33,13 +33,13 @@
 
 #include <glib/gtypes.h>
 
-#ifdef  __GNUC__
+#if defined (GLIB_HAVE_ALLOCA_H)
+/* a native and working alloca.h is there */ 
+# include <alloca.h>
+#elif defined (__GNUC__)
 /* GCC does the right thing */
 # undef alloca
 # define alloca(size)   __builtin_alloca (size)
-#elif defined (GLIB_HAVE_ALLOCA_H)
-/* a native and working alloca.h is there */ 
-# include <alloca.h>
 #else /* !__GNUC__ && !GLIB_HAVE_ALLOCA_H */
 # if defined(_MSC_VER) || defined(__DMC__)
 #  include <malloc.h>
