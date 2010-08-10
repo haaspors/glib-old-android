@@ -921,6 +921,29 @@ escape_string (GString *string)
     }
 }
 
+#ifdef BUILD_WITH_ANDROID
+#include <android/log.h>
+void g_log_default_handler (const gchar   *log_domain,
+		       GLogLevelFlags log_level,
+		       const gchar   *message,
+		       gpointer	      unused_data)
+{
+  gint pri = ANDROID_LOG_UNKNOWN;
+
+  if (log_level & G_LOG_FLAG_FATAL)
+    pri = ANDROID_LOG_FATAL;
+  else if (log_level & (G_LOG_LEVEL_ERROR | G_LOG_LEVEL_CRITICAL))
+    pri = ANDROID_LOG_ERROR;
+  else if (log_level & G_LOG_LEVEL_WARNING)
+    pri = ANDROID_LOG_WARN;
+  else if (log_level & (G_LOG_LEVEL_MESSAGE | G_LOG_LEVEL_INFO))
+    pri = ANDROID_LOG_INFO;
+  else if (log_level & G_LOG_LEVEL_DEBUG)
+    pri = ANDROID_LOG_DEBUG;
+
+  __android_log_print (pri, log_domain == NULL ? "GLib-NULL" : log_domain, message);
+}
+#else
 void
 g_log_default_handler (const gchar   *log_domain,
 		       GLogLevelFlags log_level,
@@ -998,6 +1021,7 @@ g_log_default_handler (const gchar   *log_domain,
   write_string (fd, string);
   g_free (string);
 }
+#endif
 
 GPrintFunc
 g_set_print_handler (GPrintFunc func)
