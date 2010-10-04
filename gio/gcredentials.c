@@ -78,7 +78,7 @@ struct _GCredentials
   /*< private >*/
   GObject parent_instance;
 
-#ifdef __linux__
+#if defined(__linux__) || defined(BUILD_WITH_ANDROID)
   struct ucred native;
 #elif defined(__FreeBSD__)
   struct cmsgcred native;
@@ -126,7 +126,7 @@ g_credentials_class_init (GCredentialsClass *klass)
 static void
 g_credentials_init (GCredentials *credentials)
 {
-#ifdef __linux__
+#if defined(__linux__) || defined(BUILD_WITH_ANDROID)
   credentials->native.pid = getpid ();
   credentials->native.uid = geteuid ();
   credentials->native.gid = getegid ();
@@ -178,7 +178,7 @@ g_credentials_to_string (GCredentials *credentials)
   g_return_val_if_fail (G_IS_CREDENTIALS (credentials), NULL);
 
   ret = g_string_new ("GCredentials:");
-#ifdef __linux__
+#if defined(__linux__) || defined(BUILD_WITH_ANDROID)
   g_string_append (ret, "linux-ucred:");
   if (credentials->native.pid != -1)
     g_string_append_printf (ret, "pid=%" G_GINT64_FORMAT ",", (gint64) credentials->native.pid);
@@ -233,7 +233,7 @@ g_credentials_is_same_user (GCredentials  *credentials,
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   ret = FALSE;
-#ifdef __linux__
+#if defined(__linux__) || defined(BUILD_WITH_ANDROID)
   if (credentials->native.uid == other_credentials->native.uid)
     ret = TRUE;
 #elif defined(__FreeBSD__)
@@ -278,7 +278,7 @@ g_credentials_get_native (GCredentials     *credentials,
 
   ret = NULL;
 
-#ifdef __linux__
+#if defined(__linux__) || defined(BUILD_WITH_ANDROID)
   if (native_type != G_CREDENTIALS_TYPE_LINUX_UCRED)
     {
       g_warning ("g_credentials_get_native: Trying to get credentials of type %d but only "
@@ -328,7 +328,7 @@ g_credentials_set_native (GCredentials     *credentials,
                           GCredentialsType  native_type,
                           gpointer          native)
 {
-#ifdef __linux__
+#if defined(__linux__) || defined(BUILD_WITH_ANDROID)
   if (native_type != G_CREDENTIALS_TYPE_LINUX_UCRED)
     {
       g_warning ("g_credentials_set_native: Trying to set credentials of type %d "
@@ -384,7 +384,7 @@ g_credentials_get_unix_user (GCredentials    *credentials,
   g_return_val_if_fail (G_IS_CREDENTIALS (credentials), -1);
   g_return_val_if_fail (error == NULL || *error == NULL, -1);
 
-#ifdef __linux__
+#if defined(__linux__) || defined(BUILD_WITH_ANDROID)
   ret = credentials->native.uid;
 #elif defined(__FreeBSD__)
   ret = credentials->native.cmcred_euid;
@@ -428,7 +428,7 @@ g_credentials_set_unix_user (GCredentials    *credentials,
   g_return_val_if_fail (error == NULL || *error == NULL, FALSE);
 
   ret = FALSE;
-#ifdef __linux__
+#if defined(__linux__) || defined(BUILD_WITH_ANDROID)
   credentials->native.uid = uid;
   ret = TRUE;
 #elif defined(__FreeBSD__)
