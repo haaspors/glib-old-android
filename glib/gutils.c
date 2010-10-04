@@ -1694,9 +1694,13 @@ g_get_any_init_do (void)
     
     if (!pw)
       {
+#ifdef BUILD_WITH_ANDROID
+	pw = getpwuid (getuid ());
+#else
 	setpwent ();
 	pw = getpwuid (getuid ());
 	endpwent ();
+#endif
       }
     if (pw)
       {
