@@ -598,7 +598,7 @@ static int handle_request(int out_fd, const packet_t *packet, size_t length) {
         case REQUEST_RES_QUERY:
         case REQUEST_RES_SEARCH: {
             int ret;
-            HEADER answer[BUFSIZE/sizeof(HEADER) + 1];
+            unsigned char * answer[BUFSIZE + 1];
             const res_request_t *res_req = &packet->res_request;
             const char *dname;
 
