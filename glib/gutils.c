@@ -1702,6 +1702,7 @@ g_get_any_init_do (void)
       {
 	g_user_name = g_strdup (pw->pw_name);
 
+#ifdef HAVE_STRUCT_PASSWD_PW_GECO
 	if (pw->pw_gecos && *pw->pw_gecos != '\0') 
 	  {
 	    gchar **gecos_fields;
@@ -1715,6 +1716,9 @@ g_get_any_init_do (void)
 	    g_strfreev (gecos_fields);
 	    g_strfreev (name_parts);
 	  }
+#else
+  g_real_name = g_strdup (g_user_name);
+#endif
 
 	if (!g_home_dir)
 	  g_home_dir = g_strdup (pw->pw_dir);
