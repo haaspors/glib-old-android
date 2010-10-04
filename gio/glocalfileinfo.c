@@ -1073,8 +1073,8 @@ lookup_uid_data (uid_t uid)
   struct passwd pwbuf;
 #endif
   struct passwd *pwbufp;
-  char *gecos, *comma;
-  
+  char *comma;
+
   if (uid_cache == NULL)
     uid_cache = g_hash_table_new_full (NULL, NULL, NULL, (GDestroyNotify)uid_data_free);
 
@@ -1098,15 +1098,15 @@ lookup_uid_data (uid_t uid)
       if (pwbufp->pw_name != NULL && pwbufp->pw_name[0] != 0)
 	data->user_name = convert_pwd_string_to_utf8 (pwbufp->pw_name);
 
-      gecos = pwbufp->pw_gecos;
-
-      if (gecos)
+#ifdef HAVE_STRUCT_PASSWD_PW_GECOS
+      if (pwbufp->pw_gecos)
 	{
-	  comma = strchr (gecos, ',');
+	  comma = strchr (pwbufp->pw_gecos, ',');
 	  if (comma)
 	    *comma = 0;
-	  data->real_name = convert_pwd_string_to_utf8 (gecos);
+	  data->real_name = convert_pwd_string_to_utf8 (pwbufp->pw_gecos);
 	}
+#endif
     }
 
   /* Default fallbacks */
