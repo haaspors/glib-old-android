@@ -690,7 +690,7 @@ static int process_worker(int in_fd, int out_fd) {
         goto fail;
 
 #ifdef PR_SET_PDEATHSIG
-    if (prctl(PR_SET_PDEATHSIG, SIGTERM) >= 0)
+    if (prctl(PR_SET_PDEATHSIG, SIGTERM, 0, 0, 0) >= 0)
         have_death_sig = 1;
 #endif
 
