@@ -55,8 +55,111 @@
 #include <arpa/nameser_compat.h>
 #endif
 
+#ifndef C_IN
+#define C_IN 1
+#endif
+
 #ifndef T_SRV
 #define T_SRV 33
+#endif
+
+#ifndef HEADER
+typedef struct {
+    unsigned  id :16;   /* query identification number */
+#if BYTE_ORDER == BIG_ENDIAN
+        /* fields in third byte */
+    unsigned  qr: 1;    /* response flag */
+    unsigned  opcode: 4;  /* purpose of message */
+    unsigned  aa: 1;    /* authoritive answer */
+    unsigned  tc: 1;    /* truncated message */
+    unsigned  rd: 1;    /* recursion desired */
+        /* fields in fourth byte */
+    unsigned  ra: 1;    /* recursion available */
+    unsigned  unused :1;  /* unused bits (MBZ as of 4.9.3a3) */
+    unsigned  ad: 1;    /* authentic data from named */
+    unsigned  cd: 1;    /* checking disabled by resolver */
+    unsigned  rcode :4; /* response code */
+#endif
+#if BYTE_ORDER == LITTLE_ENDIAN || BYTE_ORDER == PDP_ENDIAN
+        /* fields in third byte */
+    unsigned  rd :1;    /* recursion desired */
+    unsigned  tc :1;    /* truncated message */
+    unsigned  aa :1;    /* authoritive answer */
+    unsigned  opcode :4;  /* purpose of message */
+    unsigned  qr :1;    /* response flag */
+        /* fields in fourth byte */
+    unsigned  rcode :4; /* response code */
+    unsigned  cd: 1;    /* checking disabled by resolver */
+    unsigned  ad: 1;    /* authentic data from named */
+    unsigned  unused :1;  /* unused bits (MBZ as of 4.9.3a3) */
+    unsigned  ra :1;    /* recursion available */
+#endif
+        /* remaining bytes */
+    unsigned  qdcount :16;  /* number of question entries */
+    unsigned  ancount :16;  /* number of answer entries */
+    unsigned  nscount :16;  /* number of authority entries */
+    unsigned  arcount :16;  /* number of resource entries */
+} HEADER;
+#endif
+
+#ifndef NS_GET16
+#define NS_GET16(s, cp) do { \
+	register const u_char *t_cp = (const u_char *)(cp); \
+	(s) = ((u_int16_t)t_cp[0] << 8) \
+	    | ((u_int16_t)t_cp[1]) \
+	    ; \
+	(cp) += 2; \
+} while (0)
+#endif
+
+#ifndef NS_GET32
+#define NS_GET32(l, cp) do { \
+	register const u_char *t_cp = (const u_char *)(cp); \
+	(l) = ((u_int32_t)t_cp[0] << 24) \
+	    | ((u_int32_t)t_cp[1] << 16) \
+	    | ((u_int32_t)t_cp[2] << 8) \
+	    | ((u_int32_t)t_cp[3]) \
+	    ; \
+	(cp) += 4; \
+} while (0)
+#endif
+
+#ifndef NS_PUT16
+#define NS_PUT16(s, cp) do { \
+	register u_int16_t t_s = (u_int16_t)(s); \
+	register u_char *t_cp = (u_char *)(cp); \
+	*t_cp++ = t_s >> 8; \
+	*t_cp   = t_s; \
+	(cp) += 2; \
+} while (0)
+#endif
+
+#ifndef NS_PUT32
+#define NS_PUT32(l, cp) do { \
+	register u_int32_t t_l = (u_int32_t)(l); \
+	register u_char *t_cp = (u_char *)(cp); \
+	*t_cp++ = t_l >> 24; \
+	*t_cp++ = t_l >> 16; \
+	*t_cp++ = t_l >> 8; \
+	*t_cp   = t_l; \
+	(cp) += 4; \
+} while (0)
+#endif
+
+#ifndef GETSHORT
+#define GETSHORT NS_GET16
+#endif
+
+#ifndef GETLONG
+#define GETLONG NS_GET32
+#endif
+
+#ifndef PUTSHORT
+#define PUTSHORT NS_PUT16
+#endif
+
+#ifndef PUTLONG
+#define PUTLONG NS_PUT32
 #endif
 
 /* We're supposed to define _GNU_SOURCE to get EAI_NODATA, but that
@@ -71,6 +174,18 @@
 #include <resolv.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+
+#ifndef IN6_IS_ADDR_MC_NODELOCAL
+#define IN6_IS_ADDR_MC_NODELOCAL(a)				\
+	(IN6_IS_ADDR_MULTICAST(a) &&				\
+	(IPV6_ADDR_MC_SCOPE(a) == IPV6_ADDR_SCOPE_NODELOCAL))
+#endif
+
+#ifndef IN6_IS_ADDR_MC_GLOBAL
+#define IN6_IS_ADDR_MC_GLOBAL(a)				\
+	(IN6_IS_ADDR_MULTICAST(a) &&				\
+	(IPV6_ADDR_MC_SCOPE(a) == IPV6_ADDR_SCOPE_GLOBAL))
+#endif
 
 #ifndef _PATH_RESCONF
 #define _PATH_RESCONF "/etc/resolv.conf"
