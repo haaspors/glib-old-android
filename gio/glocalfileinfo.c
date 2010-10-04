@@ -1068,8 +1068,10 @@ static UidData *
 lookup_uid_data (uid_t uid)
 {
   UidData *data;
+#if defined (HAVE_POSIX_GETPWUID_R) || (HAVE_NONPOSIX_GETPWUID_R)
   char buffer[4096];
   struct passwd pwbuf;
+#endif
   struct passwd *pwbufp;
   char *gecos, *comma;
   
@@ -1157,8 +1159,10 @@ static char *
 lookup_gid_name (gid_t gid)
 {
   char *name;
+#if defined (HAVE_POSIX_GETGRGID_R) || (HAVE_NONPOSIX_GETGRGID_R)
   char buffer[4096];
   struct group gbuf;
+#endif
   struct group *gbufp;
   
   if (gid_cache == NULL)
