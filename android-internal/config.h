@@ -34,7 +34,7 @@
 #define GETTEXT_PACKAGE "glib20"
 
 /* Define to the GLIB binary age */
-#define GLIB_BINARY_AGE 2401
+#define GLIB_BINARY_AGE 2600
 
 /* Byte contents of gmutex */
 #define GLIB_BYTE_CONTENTS_GMUTEX no
@@ -48,11 +48,11 @@
 /* Define to the GLIB major version */
 #define GLIB_MAJOR_VERSION 2
 
-/* Define to the GLIB micro version */
-#define GLIB_MICRO_VERSION 1
-
 /* Define to the GLIB minor version */
-#define GLIB_MINOR_VERSION 24
+#define GLIB_MINOR_VERSION 26
+
+/* Define to the GLIB micro version */
+#define GLIB_MICRO_VERSION 0
 
 /* The size of gmutex, as computed by sizeof. */
 #define GLIB_SIZEOF_GMUTEX 24
